@@ -1,0 +1,28 @@
+name: EmoteraEnv
+description: Real-time emotion-based customer interaction environment using the Emotera AI backend.
+observation_space:
+  emotion: string
+  confidence: float
+  transcript: string
+  call_duration: float
+  emotion_trend: list
+action_space:
+  response_type: 
+    - empathetic
+    - solution
+    - escalation
+  message: string
+reward_range: [-1.0, 1.0]
+tasks:
+  - id: emotion-stabilization-easy
+    name: Emotion Stabilization
+    description: Reduce negative emotion.
+    difficulty: Easy
+  - id: smart-response-medium
+    name: Smart Response Selection
+    description: Choose correct response type based on the customer's emotion.
+    difficulty: Medium
+  - id: call-resolution-hard
+    name: Call Resolution Efficiency
+    description: Improve customer emotion quickly while providing relevant responses.
+    difficulty: Hard

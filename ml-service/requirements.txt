@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+librosa
+numpy
+scikit-learn
+soundfile
+python-multipart
+openai-whisper
+websockets
+torch

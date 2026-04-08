@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="manifest.json">
+<title>Emotera - Emotion Dashboard</title>
+</xai:function_call name="edit_file">
+<parameter name="path">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="skeleton">
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+<img src="emotera-logo.jpg" alt="Emotera" class="logo-img" style="height: 48px; width: auto;">
+
+</xai:function_call name="edit_file">
+
+<xai:function_call name="edit_file">
+<parameter name="path">
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="#" class="nav-link active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-history"></i> History</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <header class="header">
+                <div>
+                    <h2>Emotion Analysis</h2>
+                    <p>Live voice emotion detection</p>
+                </div>
+                <div class="user-info">
+                    <span id="currentUser">Demo User</span>
+                    <button id="logoutBtn" class="logout-btn">Logout</button>
+                </div>
+            </header>
+
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-face-smile"></i>
+                    </div>
+                    <div class="stat-value" id="currentEmotion">NEUTRAL</div>
+                    <div class="stat-label">Current Emotion</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-signal"></i>
+                    </div>
+                    <div class="stat-value" id="confidence">0%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-stopwatch"></i>
+                    </div>
+                    <div class="stat-value" id="sessionTime">--:--</div>
+                    <div class="stat-label">Recording Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-wave-square"></i>
+                    </div>
+                    <div class="stat-value" id="samples">0</div>
+                    <div class="stat-label">Samples</div>
+                </div>
+            </section>
+
+            <section class="chart-section">
+                <div class="chart-card">
+                    <h3>Emotion Trends</h3>
+                    <div class="chart-container">
+<canvas id="emotionChart"></canvas>
+<script>
+  // Chart stub
+  const ctx = document.getElementById('emotionChart').getContext('2d');
+  window.myChart = new Chart(ctx, {
+    type: 'line',
+    data Asc {
+      labels: [],
+      datasets: [{
+        label: 'Emotion Confidence',
+        data: [],
+        borderColor: 'rgb(59,130,246)',
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true, max: 100 }
+      }
+    }
+  });
+</script>
+
+                    </div>
+                </div>
+                <div class="history-card">
+                    <h3>Recent Detections <span id="historyCount">(0)</span></h3>
+                    <ul class="history-list" id="historyList">
+                        <li class="history-item"><span>No data</span><span>-</span></li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="controls">
+                <button id="startBtn" class="btn">
+                    <i class="fas fa-microphone-slash"></i> Start Recording
+                </button>
+                <button id="stopBtn" class="btn" disabled>Stop</button>
+            </section>
+
+            <section class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Drag & drop MP3 files here or <span class="click-upload">click to browse</span></p>
+                    <input type="file" id="fileInput" accept=".mp3" multiple hidden>
+                    <div id="uploadList" class="upload-list"></div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Light async loads: UI first, then libs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@latest" defer></script>
+    <script src="app.js" defer></script>
+</body>
+</html>
