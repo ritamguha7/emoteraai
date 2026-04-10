@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+librosa
+soundfile
+scikit-learn
+numpy
+pandas
+flask
+flask-cors
+openai-whisper
+transformers
+torch
