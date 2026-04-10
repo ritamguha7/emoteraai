@@ -133,7 +133,7 @@ export default function Auth() {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '2rem' }}>
-      <div className="glass-card animate-fade" style={{ width: '100%', maxWidth: '440px', padding: '3rem' }}>
+      <div className="glass-card animate-fade auth-card" style={{ width: '100%', maxWidth: '440px' }}>
         <div className="text-center" style={{ marginBottom: '2rem' }}>
           <h1 className="gradient-text" style={{ fontSize: '2.5rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
             <img src="/logo.png" alt="Emotera AI Logo" style={{ height: '48px', objectFit: 'contain' }} />

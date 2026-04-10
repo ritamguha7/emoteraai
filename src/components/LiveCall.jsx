@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
+import { getEmotionColor, getEmotionScore, getEmotionEmoji } from '../data/emotionColors';
 
 export default function LiveCall() {
   const [wsStatus, setWsStatus] = useState('Disconnected');
@@ -22,35 +23,7 @@ export default function LiveCall() {
   const ws = useRef(null);
   const timerRef = useRef(null);
 
-  const getEmotionColor = (em) => {
-    switch(em.toLowerCase()) {
-      case 'happy': return 'var(--warning)';
-      case 'sad': return 'var(--accent-main)';
-      case 'angry': return 'var(--danger)';
-      case 'neutral': return 'var(--success)';
-      default: return 'var(--text-sub)';
-    }
-  };
-
-  const getEmotionScore = (em) => {
-    switch(em.toLowerCase()) {
-      case 'happy': return 100;
-      case 'neutral': return 75;
-      case 'sad': return 50;
-      case 'angry': return 25;
-      default: return 75; // Default middle
-    }
-  };
-
-  const getEmotionEmoji = (em) => {
-     switch(em.toLowerCase()) {
-      case 'happy': return '😊';
-      case 'sad': return '😔';
-      case 'angry': return '😠';
-      case 'neutral': return '😐';
-      default: return '⏳';
-     }
-  };
+  // getEmotionColor, getEmotionScore, getEmotionEmoji are now imported from '../data/emotionColors'
 
   useEffect(() => {
     // Initialize WebSocket
@@ -125,7 +98,7 @@ export default function LiveCall() {
 
   return (
     <div className="animate-fade">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div className="live-call-header">
         <div>
           <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Live Call Analysis</h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

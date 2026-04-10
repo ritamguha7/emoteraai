@@ -6,6 +6,7 @@ import { auth, db } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc, collection, addDoc, serverTimestamp, query, where, orderBy, onSnapshot, updateDoc, deleteDoc } from 'firebase/firestore';
 import { countryCodes } from '../data/countryCodes';
+import { getEmotionColor } from '../data/emotionColors';
 import LiveCall from '../components/LiveCall';
 
 export default function Dashboard() {
@@ -366,23 +367,16 @@ export default function Dashboard() {
     return `${m}:${s}`;
   };
 
-  const getEmotionColor = (em) => {
-    switch(em) {
-      case 'HAPPY': return 'var(--warning)';
-      case 'SAD': return 'var(--accent-main)';
-      case 'ANGRY': return 'var(--danger)';
-      default: return 'var(--text-sub)';
-    }
-  };
+  // getEmotionColor is now imported from '../data/emotionColors'
 
   // Mock historical sessions
   const mockHistoricalSessions = [];
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-gradient)' }}>
+    <div className="dashboard-container">
       {/* Sidebar */}
-      <nav style={{ width: '260px', background: 'var(--bg-secondary)', borderRight: '1px solid var(--glass-border)', padding: '2rem 0' }}>
-        <div style={{ padding: '0 1.5rem 2rem', borderBottom: '1px solid var(--glass-border)', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <nav className="dashboard-sidebar">
+        <div className="dashboard-sidebar-title">
           <img src="/logo.png" alt="Logo" style={{ height: '32px', objectFit: 'contain' }} />
           <h2 className="gradient-text" style={{ fontSize: '1.5rem', margin: 0 }}>Emotera AI</h2>
         </div>
@@ -452,8 +446,8 @@ export default function Dashboard() {
       </nav>
 
       {/* Main content */}
-      <main style={{ flex: 1, padding: '2rem' }}>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)' }}>
+      <main className="dashboard-main">
+        <header className="dashboard-header">
           <div className="animate-fade">
             <h2 style={{ fontSize: '2.5rem', fontWeight: 800 }}>
               {currentView === 'dashboard' && 'Emotion Analysis'}
@@ -479,7 +473,7 @@ export default function Dashboard() {
         {currentView === 'dashboard' ? (
           <>
             {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+            <div className="dashboard-stats-grid">
               <div className="glass-card animate-fade" style={{ animationDelay: '0.1s' }}>
                 <div style={{ color: getEmotionColor(emotion), fontSize: '2.5rem', fontWeight: 700 }}>{emotion}</div>
                 <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Current Emotion</div>
@@ -501,7 +495,7 @@ export default function Dashboard() {
             </div>
 
             {/* Chart & History */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2.5rem' }}>
+            <div className="chart-history-grid">
               <div className="glass-card animate-fade" style={{ animationDelay: '0.5s' }}>
                 <h3 style={{ marginBottom: '1.5rem' }}>Emotion Trends</h3>
                 <div style={{ height: '300px' }}>

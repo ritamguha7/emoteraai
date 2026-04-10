@@ -30,6 +30,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from suggestion_engine import get_suggestion
+from emotion_expander import expand_emotion
 
 # ─── Logging ──────────────────────────────────────────────────
 logging.basicConfig(
@@ -248,6 +249,43 @@ def predict_emotion(features: dict) -> tuple:
         return heuristic_classify(features)
 
 
+# ─── Helper for Bytes Emotion Analysis ─────────────────────────
+def _analyze_audio_bytes(wav_bytes: bytes, transcript: str = None) -> dict:
+    """Helper to extract features, predict, and expand emotion from WAV bytes."""
+    import io
+    import soundfile as sf
+    import librosa
+    
+    try:
+        audio_buffer = io.BytesIO(wav_bytes)
+        audio_data, sr = sf.read(audio_buffer, dtype='float32')
+        
+        if len(audio_data.shape) > 1:
+            audio_data = np.mean(audio_data, axis=1)
+            
+        if sr != 22050:
+            audio_data = librosa.resample(audio_data, orig_sr=sr, target_sr=22050)
+            sr = 22050
+            
+        rms = np.sqrt(np.mean(audio_data ** 2))
+        if rms < 0.001:
+            return {"emotion": "neutral", "base_emotion": "neutral", "confidence": 0.0}
+            
+        features = extract_features(audio_data, sr)
+        base_emotion, confidence = predict_emotion(features)
+        
+        expanded = expand_emotion(
+            base_emotion,
+            confidence,
+            features=features,
+            transcript=transcript
+        )
+        return expanded
+    except Exception as e:
+        logger.error(f"Emotion analysis on transcribe failed: {e}")
+        return {"emotion": "neutral", "base_emotion": "neutral", "confidence": 0.0}
+
+
 # ═══════════════════════════════════════════════════════════════
 #  API ENDPOINTS
 # ═══════════════════════════════════════════════════════════════
@@ -256,6 +294,7 @@ def predict_emotion(features: dict) -> tuple:
 
 class AnalysisResult(BaseModel):
     emotion: str
+    base_emotion: Optional[str] = None
     suggestion: str
     confidence: float
     timestamp: str
@@ -265,6 +304,9 @@ class TranscriptionResult(BaseModel):
     text: str
     language: str
     processing_time_ms: float
+    emotion: Optional[str] = None
+    base_emotion: Optional[str] = None
+    confidence: Optional[float] = None
 
 # ─── Health Check ─────────────────────────────────────────────
 
@@ -339,18 +381,29 @@ async def analyze_audio(request: Request):
         # Extract features
         features = extract_features(audio_data, sr)
         
-        # Predict emotion
-        emotion, confidence = predict_emotion(features)
+        # Predict base emotion
+        base_emotion, confidence = predict_emotion(features)
+        
+        # Expand to nuanced emotion (no transcript available in /analyze)
+        expanded = expand_emotion(
+            base_emotion=base_emotion,
+            confidence=confidence,
+            features=features,
+            transcript=None,
+        )
+        emotion = expanded["emotion"]
+        confidence = expanded["confidence"]
         
         # Generate suggestion
         suggestion = get_suggestion(emotion)
         
         processing_time = round((time.time() - start_time) * 1000, 1)
         
-        logger.info(f"Prediction: {emotion} ({confidence}%) in {processing_time}ms")
+        logger.info(f"Prediction: {base_emotion}→{emotion} ({confidence}%) in {processing_time}ms")
         
         return AnalysisResult(
             emotion=emotion,
+            base_emotion=expanded["base_emotion"],
             suggestion=suggestion,
             confidence=confidence,
             timestamp=time.strftime('%Y-%m-%dT%H:%M:%S'),
@@ -453,6 +506,13 @@ async def transcribe_audio_file(file: UploadFile = File(...)):
         logger.error(f"Unexpected transcription error: {e}")
         raise HTTPException(status_code=500, detail=f"Transcription error: {str(e)}")
     
+    # ── Run Emotion Analysis ──
+    try:
+        emotion_info = _analyze_audio_bytes(wav_bytes, transcript=result["text"])
+    except Exception as e:
+        logger.error(f"Emotion analysis in transcribe failed: {e}")
+        emotion_info = {"emotion": "neutral", "base_emotion": "neutral", "confidence": 0.0}
+
     total_time = round((time.time() - request_start) * 1000, 1)
     
     logger.info(
@@ -463,7 +523,10 @@ async def transcribe_audio_file(file: UploadFile = File(...)):
     return TranscriptionResult(
         text=result["text"],
         language=result["language"],
-        processing_time_ms=total_time
+        processing_time_ms=total_time,
+        emotion=emotion_info.get("emotion"),
+        base_emotion=emotion_info.get("base_emotion"),
+        confidence=emotion_info.get("confidence")
     )
 
 
@@ -554,6 +617,13 @@ async def websocket_transcribe(websocket: WebSocket):
             
             if text:
                 logger.info(f"WS transcription #{total_transcribed}: \"{text[:60]}\"")
+                
+            # ── Run Emotion Analysis ──
+            try:
+                emotion_info = _analyze_audio_bytes(wav_bytes, transcript=text)
+            except Exception as e:
+                logger.error(f"WS emotion analysis failed: {e}")
+                emotion_info = {"emotion": "neutral", "base_emotion": "neutral", "confidence": 0.0}
             
             return {
                 "text": text,
@@ -562,6 +632,9 @@ async def websocket_transcribe(websocket: WebSocket):
                 "is_final": False,
                 "buffer_duration_s": round(len(combined) / max(sample_rate * 2, 1), 2),
                 "chunk_index": total_transcribed,
+                "emotion": emotion_info.get("emotion"),
+                "base_emotion": emotion_info.get("base_emotion"),
+                "confidence": emotion_info.get("confidence")
             }
             
         except Exception as e:

@@ -1,0 +1,16 @@
+{
+  "name": "Emotera AI",
+  "short_name": "Emotera",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#020202",
+  "background_color": "#020202"
+}
